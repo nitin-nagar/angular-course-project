@@ -1,31 +1,20 @@
 import { Injectable } from '@angular/core';
 
-import { ShoppingListService } from '../shopping-list/shopping-list.service';
-
 import { Ingredient } from '../shared/ingredient.model';
 import { Recipe } from './recipe.model';
 import { Subject } from 'rxjs';
+import { Store } from '@ngrx/store';
+
+import * as ShoppingListActions from '../shopping-list/store/shopping-list.actions';
+import * as fromShoppingList from '../shopping-list/store/shopping-list.reducer';
 
 @Injectable()
 export class RecipeService {
   recipesChanged = new Subject<Recipe[]>();
   recipeSelected = new Subject<Recipe>();
   private recipes: Recipe[] = [];
-  // private recipes: Recipe[] = [
-  //   new Recipe(
-  //     'Butter Chicken',
-  //     `Simple Butter chicken recipe`,
-  //     `https://www.indianhealthyrecipes.com/wp-content/uploads/2014/09/butter-chicken-500x500.jpg`,
-  //     [new Ingredient('Chicken', 1), new Ingredient('Butter', 2)]
-  //   ),
-  //   new Recipe(
-  //     'Shahi Paneer',
-  //     `Simple Shahi Paneer`,
-  //     `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_LaRfeM-EkUbJ8MXtHafkxpluBjDXpTSHYg&usqp=CAU`,
-  //     [new Ingredient('Paneer', 2), new Ingredient('Tomato', 3)]
-  //   ),
-  // ];
-  constructor(private slService: ShoppingListService) {}
+
+  constructor(private store: Store<fromShoppingList.AppState>) {}
   setRecipes(recipes: Recipe[]) {
     this.recipes = recipes;
     this.recipesChanged.next(this.recipes.slice());
@@ -38,7 +27,8 @@ export class RecipeService {
     return this.recipes.slice()[idx];
   }
   addIngredientToShoppingList(ingredients: Ingredient[]) {
-    this.slService.addIngredients(ingredients);
+    // this.slService.addIngredients(ingredients);
+    this.store.dispatch(new ShoppingListActions.AddIngredients(ingredients));
   }
   addRecipe(recipe: Recipe) {
     this.recipes.push(recipe);

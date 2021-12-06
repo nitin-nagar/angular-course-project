@@ -75,7 +75,7 @@ describe('ShoppingEditComponent', () => {
           name: 'abc',
           amount: 1,
         });
-      });
+      }, 200);
       const inputElements = formElement.querySelectorAll('input');
       expect(inputElements[0].value).not.toBe(null);
       expect(inputElements[1].value).not.toBe(null);

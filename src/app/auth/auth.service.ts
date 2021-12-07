@@ -5,6 +5,7 @@ import { throwError, tap, BehaviorSubject } from 'rxjs';
 import { User } from './user.model';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
+import { LocalService } from '../shared/local.service';
 export interface AuthResponseData {
   kind: string;
   idToken: string;
@@ -20,7 +21,11 @@ export class AuthService {
   user = new BehaviorSubject<User>(null);
   private tokenExpTimer: any;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private localService: LocalService
+  ) {}
 
   login(email: string, password: string) {
     return this.http
@@ -71,7 +76,7 @@ export class AuthService {
       id: string;
       _token: string;
       _tokenExprationDate: string;
-    } = JSON.parse(localStorage.getItem('userData'));
+    } = this.localService.getJsonValue('userData');
 
     if (!userData) {
       return;
@@ -81,7 +86,6 @@ export class AuthService {
       userData.email,
       userData.id,
       userData._token,
-      // new Date()
       new Date(userData._tokenExprationDate)
     );
     if (loadedUser.token) {
@@ -96,7 +100,8 @@ export class AuthService {
   logout() {
     this.user.next(null);
     this.router.navigate(['/auth']);
-    localStorage.removeItem('userData');
+    // localStorage.removeItem('userData');
+    this.localService.clearToken();
     if (this.tokenExpTimer) {
       clearTimeout(this.tokenExpTimer);
     }
@@ -117,7 +122,7 @@ export class AuthService {
     const user = new User(email, userId, token, expirationDate);
     this.user.next(user);
     this.autoLogout(expiresIn * 1000);
-    localStorage.setItem('userData', JSON.stringify(user));
+    this.localService.setJsonValue('userData', user);
   }
 
   private handleError(errorRes: HttpErrorResponse) {

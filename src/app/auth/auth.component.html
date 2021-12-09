@@ -37,28 +37,28 @@
           minlength="6"
         />
       </div>
-      <div class="form-group" *ngIf="!isLoginMode">
-        <label for="cpassword">Confirm Password</label>
-        <input
-          type="password"
-          class="form-control"
-          id="cpassword"
-          name="cpassword"
-          required
-          password
-        />
-      </div>
+
       <div>
         <button
           type="submit"
           class="btn btn-primary"
           [disabled]="!authForm.valid"
         >
-          {{ isLoginMode ? "Login" : "Sign up" }}
+          {{ isLoginMode ? 'Login' : 'Sign up' }}
         </button>
         |
         <button type="button" class="btn btn-primary" (click)="onSwitchMode()">
-          Switch to {{ isLoginMode ? "Signup" : "Login" }}
+          Switch to {{ isLoginMode ? 'Signup' : 'Login' }}
+        </button>
+      </div>
+      OR
+      <div>
+        <button
+          type="button"
+          class="btn btn-danger"
+          (click)="loginWithGoogle()"
+        >
+          Login With Google
         </button>
       </div>
     </form>

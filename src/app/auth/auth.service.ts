@@ -5,6 +5,9 @@ import { throwError, tap, BehaviorSubject } from 'rxjs';
 import { User } from './user.model';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
+import firebase from '@firebase/app-compat';
+import { LocalService } from '../shared/local.service';
 export interface AuthResponseData {
   kind: string;
   idToken: string;
@@ -20,8 +23,30 @@ export class AuthService {
   user = new BehaviorSubject<User>(null);
   private tokenExpTimer: any;
 
-  constructor(private http: HttpClient, private router: Router) {}
-
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private localService: LocalService,
+    private auth: AngularFireAuth
+  ) {}
+  googleSingUp() {
+    this.auth.setPersistence('none').then(() => {
+      this.auth
+        .signInWithPopup(
+          new firebase.auth.GoogleAuthProvider().setCustomParameters({
+            prompt: 'select_account',
+          })
+        )
+        .then((result) => {
+          const user = result.user;
+          this.handleAuthentication(user.email, user.uid, user.uid, 3600);
+          this.router.navigate(['/recipes']);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    });
+  }
   login(email: string, password: string) {
     return this.http
       .post<AuthResponseData>(
@@ -71,7 +96,7 @@ export class AuthService {
       id: string;
       _token: string;
       _tokenExprationDate: string;
-    } = JSON.parse(localStorage.getItem('userData'));
+    } = this.localService.getJsonValue('userData');
 
     if (!userData) {
       return;
@@ -96,7 +121,7 @@ export class AuthService {
   logout() {
     this.user.next(null);
     this.router.navigate(['/auth']);
-    localStorage.removeItem('userData');
+    this.localService.clearToken();
     if (this.tokenExpTimer) {
       clearTimeout(this.tokenExpTimer);
     }
@@ -117,7 +142,7 @@ export class AuthService {
     const user = new User(email, userId, token, expirationDate);
     this.user.next(user);
     this.autoLogout(expiresIn * 1000);
-    localStorage.setItem('userData', JSON.stringify(user));
+    this.localService.setJsonValue('userData', user);
   }
 
   private handleError(errorRes: HttpErrorResponse) {
@@ -128,10 +153,13 @@ export class AuthService {
     switch (errorRes.error.error.message) {
       case 'EMAIL_EXISTS':
         errorMsg = 'This email exists already';
+        break;
       case 'EMAIL_NOT_FOUND':
         errorMsg = 'User not registered';
+        break;
       case 'INVALID_PASSWORD':
         errorMsg = 'Invalid Password';
+        break;
     }
     return throwError(() => errorMsg);
   }

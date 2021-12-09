@@ -29,6 +29,7 @@ export class ShoppingEditComponent implements OnInit, OnDestroy {
       this.editedItemIndex = index;
       this.editMode = true;
       this.editedItem = this.slService.getIngredient(index);
+      console.log(this.form);
       this.form.setValue({
         name: this.editedItem.name,
         amount: this.editedItem.amount,
@@ -53,6 +54,8 @@ export class ShoppingEditComponent implements OnInit, OnDestroy {
     this.onClear();
   }
   ngOnDestroy() {
-    this.subscription.unsubscribe();
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 }

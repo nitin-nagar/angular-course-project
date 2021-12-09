@@ -28,7 +28,9 @@ export class AuthComponent implements OnDestroy {
     private router: Router,
     private componentFactoryResolver: ComponentFactoryResolver
   ) {}
-
+  loginWithGoogle() {
+    this.authService.googleSingUp();
+  }
   onSwitchMode() {
     this.isLoginMode = !this.isLoginMode;
   }

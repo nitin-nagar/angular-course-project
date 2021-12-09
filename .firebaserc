@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "test-604c7": {
+      "hosting": {
+        "course-project": [
+          "test-604c7"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "test-604c7"
+  }
+}
